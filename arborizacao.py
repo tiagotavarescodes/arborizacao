@@ -8,7 +8,6 @@ Original file is located at
 """
 
 import streamlit as st
-from keras.models import load_model
 from tensorflow.keras.models import load_model
 from PIL import Image, ImageOps
 import numpy as np
