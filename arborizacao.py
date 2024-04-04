@@ -8,47 +8,47 @@ Original file is located at
 """
 
 import streamlit as st
-import tensorflow as tf
+from keras.models import load_model
 from PIL import Image, ImageOps
 import numpy as np
 
-# Carregar o modelo e as classes
-model = tf.keras.models.load_model("keras_model.h5")
-class_names = open("labels.txt", "r").read().splitlines()
+np.set_printoptions(suppress=True)
 
-# Função para pré-processar a imagem
-def preprocess_image(image):
+@st.cache(allow_output_mutation=True)
+def load_keras_model(model_path):
+    return load_model(model_path, compile=False)
+
+def preprocess_image(image_path):
+    image = Image.open(image_path).convert("RGB")
     size = (224, 224)
     image = ImageOps.fit(image, size, Image.ANTIALIAS)
     image_array = np.asarray(image)
     normalized_image_array = (image_array.astype(np.float32) / 127.5) - 1
     return np.expand_dims(normalized_image_array, axis=0)
 
-# Função para prever a classe da imagem
-def predict(image):
-    data = preprocess_image(image)
-    prediction = model.predict(data)
-    index = np.argmax(prediction)
-    class_name = class_names[index]
-    confidence_score = prediction[0][index]
-    return class_name, confidence_score
-
-# Função principal do Streamlit
 def main():
     st.title("Classificador de Imagens")
 
-    uploaded_file = st.file_uploader("Escolha uma imagem...", type=["jpg", "png", "jpeg"])
+    model_path = st.text_input("Caminho do modelo Keras (.h5):")
+    labels_path = st.text_input("Caminho do arquivo de rótulos (.txt):")
+    image_path = st.text_input("Caminho da imagem para teste:")
 
-    if uploaded_file is not None:
-        image = Image.open(uploaded_file)
-        st.image(image, caption='Imagem carregada', use_column_width=True)
-        st.write("")
-        st.write("Classificando...")
+    if st.button("Carregar Modelo e Rótulos"):
+        global model, class_names
+        model = load_keras_model(model_path)
+        class_names = open(labels_path, "r").readlines()
+        st.success("Modelo e rótulos carregados com sucesso!")
 
-        class_name, confidence_score = predict(image)
-
-        st.write(f"Classe: {class_name}")
-        st.write(f"Pontuação de Confiança: {confidence_score}")
+    if 'model' in globals() and 'class_names' in globals():
+        if st.button("Processar Imagem"):
+            data = preprocess_image(image_path)
+            prediction = model.predict(data)
+            index = np.argmax(prediction)
+            class_name = class_names[index]
+            confidence_score = prediction[0][index]
+            
+            st.write("Classe:", class_name[2:])
+            st.write("Pontuação de Confiança:", confidence_score)
 
 if __name__ == "__main__":
     main()
