@@ -16,7 +16,7 @@ import numpy as np
 np.set_printoptions(suppress=True)
 
 # Load the model
-model = load_model("/content/keras_model.h5", compile=False)
+model = load_model("/arborizacao/keras_model.h5", compile=False)
 
 # Define class names
 class_names = ["Não", "Sim"]
