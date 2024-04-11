@@ -22,7 +22,7 @@ def predict_class(image_path):
     return class_name, confidence_score
 
 # Create the Streamlit app layout
-st.title("Pode Plantar? Classificação de Imagens")
+st.title("Pode Plantar?")
 
 uploaded_file = st.file_uploader("Escolha uma imagem para classificação", type=["jpg", "jpeg", "png"])
 
